@@ -50,7 +50,8 @@ func cleanUpTestData(conf *config.Config) error {
 func TestRawGet1(t *testing.T) {
 	conf := config.NewTestConfig()
 	s := standalone_storage.NewStandAloneStorage(conf)
-	s.Start()
+	err := s.Start()
+	assert.Nil(t, err)
 	server := NewServer(s)
 	defer cleanUpTestData(conf)
 	defer s.Stop()

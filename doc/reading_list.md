@@ -9,7 +9,7 @@
       - <http://smalldatum.blogspot.com/2019/05/crum-conjecture-read-write-space-and.html>
   - B-Tree (Optional)
     - Reading Materials
-      - Database Internals: 2. B-Tree Basics
+      - ###### Database Internals: 2. B-Tree Basics
       - Database Internals: 3. File Formats
       - Database Internals: 4. Implementing B-Trees
     - Reference

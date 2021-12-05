@@ -2,6 +2,7 @@ package raft_storage
 
 import (
 	"github.com/Connor1996/badger"
+
 	"github.com/pingcap-incubator/tinykv/kv/raftstore/util"
 	"github.com/pingcap-incubator/tinykv/kv/util/engine_util"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/metapb"

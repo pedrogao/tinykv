@@ -7,10 +7,12 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
+// KeyWithCF 给 key 加上前缀，作为 Column family 的命名空间
 func KeyWithCF(cf string, key []byte) []byte {
 	return append([]byte(cf+"_"), key...)
 }
 
+// GetCF 原理很简单，每个 key 前面加上一个 xxx_ 前缀
 func GetCF(db *badger.DB, cf string, key []byte) (val []byte, err error) {
 	err = db.View(func(txn *badger.Txn) error {
 		val, err = GetCFFromTxn(txn, cf, key)
