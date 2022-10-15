@@ -191,7 +191,8 @@ func (ms *MemoryStorage) ApplySnapshot(snap pb.Snapshot) error {
 // can be used to reconstruct the state at that point.
 // If any configuration changes have been made since the last compaction,
 // the result of the last ApplyConfChange must be passed in.
-func (ms *MemoryStorage) CreateSnapshot(i uint64, cs *pb.ConfState, data []byte) (pb.Snapshot, error) {
+func (ms *MemoryStorage) CreateSnapshot(i uint64, cs *pb.ConfState,
+	data []byte) (pb.Snapshot, error) {
 	ms.Lock()
 	defer ms.Unlock()
 	if i <= ms.snapshot.Metadata.Index {
@@ -200,7 +201,7 @@ func (ms *MemoryStorage) CreateSnapshot(i uint64, cs *pb.ConfState, data []byte)
 
 	offset := ms.ents[0].Index
 	if i > ms.lastIndex() {
-		log.Panicf("snapshot %d is out of bound lastindex(%d)", i, ms.lastIndex())
+		log.Panicf("snapshot %d is out of bound last index(%d)", i, ms.lastIndex())
 	}
 
 	ms.snapshot.Metadata.Index = i
@@ -223,7 +224,7 @@ func (ms *MemoryStorage) Compact(compactIndex uint64) error {
 		return ErrCompacted
 	}
 	if compactIndex > ms.lastIndex() {
-		log.Panicf("compact %d is out of bound lastindex(%d)", compactIndex, ms.lastIndex())
+		log.Panicf("compact %d is out of bound last index(%d)", compactIndex, ms.lastIndex())
 	}
 
 	i := compactIndex - offset

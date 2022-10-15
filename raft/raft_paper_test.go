@@ -90,12 +90,12 @@ func TestLeaderBcastBeat2AA(t *testing.T) {
 	r := newTestRaft(1, []uint64{1, 2, 3}, 10, hi, NewMemoryStorage())
 	r.becomeCandidate()
 	r.becomeLeader()
-
+	// leader处理 propose，发送一次 heart bear
 	r.Step(pb.Message{MsgType: pb.MessageType_MsgPropose, Entries: []*pb.Entry{{}}})
 	r.readMessages() // clear message
 
 	for i := 0; i < hi; i++ {
-		r.tick()
+		r.tick() // 再发送一次 heart bear
 	}
 
 	msgs := r.readMessages()
@@ -132,11 +132,11 @@ func testNonleaderStartElection(t *testing.T, state StateType) {
 	r := newTestRaft(1, []uint64{1, 2, 3}, et, 1, NewMemoryStorage())
 	switch state {
 	case StateFollower:
-		r.becomeFollower(1, 2)
+		r.becomeFollower(1, 2) // 2号是leader
 	case StateCandidate:
 		r.becomeCandidate()
 	}
-
+	// 超时
 	for i := 1; i < 2*et; i++ {
 		r.tick()
 	}
@@ -190,8 +190,8 @@ func TestLeaderElectionInOneRoundRPC2AA(t *testing.T) {
 	for i, tt := range tests {
 		r := newTestRaft(1, idsBySize(tt.size), 10, 1, NewMemoryStorage())
 
-		r.Step(pb.Message{From: 1, To: 1, MsgType: pb.MessageType_MsgHup})
-		for id, vote := range tt.votes {
+		r.Step(pb.Message{From: 1, To: 1, MsgType: pb.MessageType_MsgHup}) // 开始选举
+		for id, vote := range tt.votes {                                   // 投票
 			r.Step(pb.Message{From: id, To: 1, Term: r.Term, MsgType: pb.MessageType_MsgRequestVoteResponse, Reject: !vote})
 		}
 

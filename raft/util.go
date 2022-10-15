@@ -121,9 +121,16 @@ func IsLocalMsg(msgt pb.MessageType) bool {
 }
 
 func IsResponseMsg(msgt pb.MessageType) bool {
-	return msgt == pb.MessageType_MsgAppendResponse || msgt == pb.MessageType_MsgRequestVoteResponse || msgt == pb.MessageType_MsgHeartbeatResponse
+	return msgt == pb.MessageType_MsgAppendResponse || msgt == pb.MessageType_MsgRequestVoteResponse ||
+		msgt == pb.MessageType_MsgHeartbeatResponse
 }
 
 func isHardStateEqual(a, b pb.HardState) bool {
 	return a.Term == b.Term && a.Vote == b.Vote && a.Commit == b.Commit
+}
+
+func panicIf(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

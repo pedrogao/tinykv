@@ -69,7 +69,7 @@ it contains. These steps may be performed in parallel, except as noted in step
 not empty. Note that when writing an Entry with Index i, any
 previously-persisted entries with Index >= i must be discarded.
 
-2. Send all Messages to the nodes named in the To field. It is important that
+2. Send all Messages to the nodes named in the `To` field. It is important that
 no messages be sent until the latest HardState has been persisted to disk,
 and all Entries written by any previous Ready batch (Messages may be sent while
 entries from the same batch are being persisted).
@@ -160,7 +160,7 @@ may be reused. Node IDs must be non-zero.
 
 Implementation notes
 
-This implementation is up to date with the final Raft thesis
+This implementation is up-to-date with the final Raft thesis
 (https://ramcloud.stanford.edu/~ongaro/thesis.pdf), although our
 implementation of the membership change protocol differs somewhat from
 that described in chapter 4. The key invariant that membership changes
@@ -177,8 +177,8 @@ proposed membership change while any uncommitted change appears in
 the leader's log.
 
 This approach introduces a problem when you try to remove a member
-from a two-member cluster: If one of the members dies before the
-other one receives the commit of the confchange entry, then the member
+from a two-member cluster: If one of the members' dies before the
+other one receives the commit of the conf change entry, then the member
 cannot be removed any more since the cluster cannot make progress.
 For this reason it is highly recommended to use three or more nodes in
 every cluster.
