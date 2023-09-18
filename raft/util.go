@@ -76,6 +76,7 @@ func diffu(a, b string) string {
 	aname, bname := mustTemp("base", a), mustTemp("other", b)
 	defer os.Remove(aname)
 	defer os.Remove(bname)
+	// diff two string by os tool
 	cmd := exec.Command("diff", "-u", aname, bname)
 	buf, err := cmd.CombinedOutput()
 	if err != nil {
@@ -93,14 +94,17 @@ func mustTemp(pre, body string) string {
 	if err != nil {
 		panic(err)
 	}
+	defer f.Close()
+
 	_, err = io.Copy(f, strings.NewReader(body))
 	if err != nil {
 		panic(err)
 	}
-	f.Close()
+
 	return f.Name()
 }
 
+// Convert RaftLog to string for debug purpose
 func ltoa(l *RaftLog) string {
 	s := fmt.Sprintf("committed: %d\n", l.committed)
 	s += fmt.Sprintf("applied:  %d\n", l.applied)
@@ -117,6 +121,7 @@ func (p uint64Slice) Less(i, j int) bool { return p[i] < p[j] }
 func (p uint64Slice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 func IsLocalMsg(msgt pb.MessageType) bool {
+	// local message type, from raft layer to node layer, never goes over network
 	return msgt == pb.MessageType_MsgHup || msgt == pb.MessageType_MsgBeat
 }
 

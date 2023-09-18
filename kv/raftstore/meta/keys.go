@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	// local is in (0x01, 0x02)
+	// LocalPrefix local is in (0x01, 0x02)
 	LocalPrefix byte = 0x01
 
 	// We save two types region data in DB, for raft and other meta data.
