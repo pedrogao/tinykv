@@ -41,6 +41,41 @@ graph TD;
 
 ![server](./imgs/server.png)
 
+## 要点
+
+### 2A
+
+实现`Raft`，这点之前在`6.824`中已经实现过了，算法细节就不再赘述了。
+
+需要注意的是，这里的`Raft`实现基本是 clone`etcd`版的，核心建议是不要**闭门造车**，如果对`etcd`不熟悉，想要就自己推出来一个`Raft`，那绝对是难如登天。
+
+课程文档的提示也是相当抽象，建议直接先看看 [etcd](https://www.codedump.info/post/20180922-etcd-raft/) 的实现，然后再看看课程文档，这样会好理解很多。
+
+### 2B
+
+整个 `raftstore` 实际很复杂，但实现的功能却不难，前提是要理解，建议在写代码之前对整个项目代码阅读一下。
+
+核心函数有：
+
+- `HandleRaftReady`；
+- `SaveReadyState`；
+- `proposeRaftCommand`；
+
+2B 部分无需实现快照，因此可以暂时不考虑快照的问题。
+
+需要注意的是，`propose`是`server层`向`raft层`提交命令，`raft层`会将命令写入到`raft log`中，然后`raft层`相互通信达到一致后，会将`proposal callback`回调到`server层`处理。
+
+### 2C
+
+2C 部分需要实现快照，和上面一样，这部分整体流程很复杂，但实现的功能却不难，前提是要理解。
+
+核心函数有：
+
+- `HandleRaftReady`；
+- `ApplySnapshot`；
+
+快照后需要对日志进行`Compact`，需要对日志进行截断，以及日志`Index`进行调整。
+
 ## 参考资料
 
 - [谈谈 Raft 分布式共识性算法的实现](https://pedrogao.github.io/posts/distribute/raft.html#%E7%8A%B6%E6%80%81%E6%9C%BA)
