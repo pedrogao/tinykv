@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/pingcap-incubator/tinykv/kv/util/engine_util"
-	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/pingcap-incubator/tinykv/kv/storage"
-	"github.com/stretchr/testify/assert"
+	"github.com/pingcap-incubator/tinykv/kv/util/engine_util"
+	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
 )
 
 func TestEncodeKey(t *testing.T) {
