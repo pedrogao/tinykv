@@ -25,12 +25,12 @@ import (
 // RaftStorage is an implementation of `Storage` (see tikv/server.go) backed by a Raft node. It is part of a Raft network.
 // By using Raft, reads and writes are consistent with other nodes in the TinyKV instance.
 type RaftStorage struct {
-	engines *engine_util.Engines
-	config  *config.Config
+	engines *engine_util.Engines // kv存储引擎
+	config  *config.Config       // 配置
 
-	node          *raftstore.Node
-	snapManager   *snap.SnapManager
-	raftRouter    *raftstore.RaftstoreRouter
+	node          *raftstore.Node            // 节点
+	snapManager   *snap.SnapManager          // 快照管理器
+	raftRouter    *raftstore.RaftstoreRouter // 路由
 	raftSystem    *raftstore.Raftstore
 	resolveWorker *worker.Worker
 	snapWorker    *worker.Worker
@@ -60,16 +60,16 @@ func (rs *RaftStorage) checkResponse(resp *raft_cmdpb.RaftCmdResponse, reqCount 
 // NewRaftStorage creates a new storage engine backed by a raftstore.
 func NewRaftStorage(conf *config.Config) *RaftStorage {
 	dbPath := conf.DBPath
-	kvPath := filepath.Join(dbPath, "kv")
-	raftPath := filepath.Join(dbPath, "raft")
-	snapPath := filepath.Join(dbPath, "snap")
+	kvPath := filepath.Join(dbPath, "kv")     // kv data
+	raftPath := filepath.Join(dbPath, "raft") // raft data
+	snapPath := filepath.Join(dbPath, "snap") // snapshot data
 
 	os.MkdirAll(kvPath, os.ModePerm)
 	os.MkdirAll(raftPath, os.ModePerm)
 	os.Mkdir(snapPath, os.ModePerm)
 
-	raftDB := engine_util.CreateDB(raftPath, true)
-	kvDB := engine_util.CreateDB(kvPath, false)
+	raftDB := engine_util.CreateDB(raftPath, true) // 存储 raft log，元数据等
+	kvDB := engine_util.CreateDB(kvPath, false)    // 存储 state machine kv 数据
 	engines := engine_util.NewEngines(kvDB, raftDB, kvPath, raftPath)
 
 	return &RaftStorage{engines: engines, config: conf}
@@ -98,13 +98,14 @@ func (rs *RaftStorage) Write(ctx *kvrpcpb.Context, batch []storage.Modify) error
 				}})
 		}
 	}
-
+	// region header data
 	header := &raft_cmdpb.RaftRequestHeader{
 		RegionId:    ctx.RegionId,
 		Peer:        ctx.Peer,
 		RegionEpoch: ctx.RegionEpoch,
 		Term:        ctx.Term,
 	}
+	// send raft sync command first
 	request := &raft_cmdpb.RaftCmdRequest{
 		Header:   header,
 		Requests: reqs,
@@ -150,6 +151,7 @@ func (rs *RaftStorage) Reader(ctx *kvrpcpb.Context) (storage.StorageReader, erro
 }
 
 func (rs *RaftStorage) Raft(stream tinykvpb.TinyKv_RaftServer) error {
+	// 发送 raft 消息
 	for {
 		msg, err := stream.Recv()
 		if err != nil {
@@ -175,6 +177,7 @@ func (rs *RaftStorage) Snapshot(stream tinykvpb.TinyKv_SnapshotServer) error {
 
 func (rs *RaftStorage) Start() error {
 	cfg := rs.config
+	// 连接调度器
 	schedulerClient, err := scheduler_client.NewClient(strings.Split(cfg.SchedulerAddr, ","), "")
 	if err != nil {
 		return err
@@ -184,13 +187,13 @@ func (rs *RaftStorage) Start() error {
 	rs.resolveWorker = worker.NewWorker("resolver", &rs.wg)
 	resolveSender := rs.resolveWorker.Sender()
 	resolveRunner := newResolverRunner(schedulerClient)
-	rs.resolveWorker.Start(resolveRunner)
+	rs.resolveWorker.Start(resolveRunner) // 开启 resolve
 
 	rs.snapManager = snap.NewSnapManager(filepath.Join(cfg.DBPath, "snap"))
 	rs.snapWorker = worker.NewWorker("snap-worker", &rs.wg)
 	snapSender := rs.snapWorker.Sender()
 	snapRunner := newSnapRunner(rs.snapManager, rs.config, rs.raftRouter)
-	rs.snapWorker.Start(snapRunner)
+	rs.snapWorker.Start(snapRunner) // 开启 snap
 
 	raftClient := newRaftClient(cfg)
 	trans := NewServerTransport(raftClient, snapSender, rs.raftRouter, resolveSender)

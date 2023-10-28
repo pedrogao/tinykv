@@ -152,7 +152,7 @@ func (bs *Raftstore) loadPeers() ([]*peer, error) {
 				bs.clearStaleMeta(kvWB, raftWB, localState)
 				continue
 			}
-
+			// create peer that includes the raft
 			peer, err := createPeer(storeID, ctx.cfg, ctx.regionTaskSender, ctx.engine, region)
 			if err != nil {
 				return err
@@ -201,10 +201,10 @@ type workers struct {
 }
 
 type Raftstore struct {
-	ctx        *GlobalContext
-	storeState *storeState
-	router     *router
-	workers    *workers
+	ctx        *GlobalContext // 全局上下文
+	storeState *storeState    // store状态
+	router     *router        // 路由
+	workers    *workers       // 工作线程
 	tickDriver *tickDriver
 	closeCh    chan struct{}
 	wg         *sync.WaitGroup

@@ -19,10 +19,10 @@ import (
 )
 
 type Node struct {
-	clusterID       uint64
+	clusterID       uint64 // clusterID is the unique ID of the TiKV cluster which the node belongs to.
 	store           *metapb.Store
 	cfg             *config.Config
-	system          *Raftstore
+	system          *Raftstore // raft store
 	schedulerClient scheduler_client.Client
 }
 

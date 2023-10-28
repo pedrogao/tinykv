@@ -205,3 +205,7 @@ func RegionEqual(l, r *metapb.Region) bool {
 	}
 	return l.Id == r.Id && l.RegionEpoch.Version == r.RegionEpoch.Version && l.RegionEpoch.ConfVer == r.RegionEpoch.ConfVer
 }
+
+func RemoveIndex(s []interface{}, index int) []interface{} {
+	return append(s[:index], s[index+1:]...)
+}
