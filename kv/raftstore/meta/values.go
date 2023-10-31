@@ -52,6 +52,7 @@ func InitRaftLocalState(raftEngine *badger.DB, region *metapb.Region) (*rspb.Raf
 	if err != nil && err != badger.ErrKeyNotFound {
 		return nil, err
 	}
+	// log.Debugf("InitRaftLocalState: %v, err: %v", raftState, err)
 	if err == badger.ErrKeyNotFound {
 		raftState = new(rspb.RaftLocalState)
 		raftState.HardState = new(eraftpb.HardState)
@@ -66,6 +67,7 @@ func InitRaftLocalState(raftEngine *badger.DB, region *metapb.Region) (*rspb.Raf
 				return raftState, err
 			}
 		}
+		// log.Debugf("InitRaftLocalState2: %v, err: %v, peers: %v", raftState, err, region.Peers)
 	}
 	return raftState, nil
 }

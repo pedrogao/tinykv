@@ -16,7 +16,9 @@
 
 ## 实现配置变更，分区分裂
 
+RegionEpoch 是 metapb.Region 元信息的一部分。当一个 Region 添加或删除 Peer 或 split 时，该 Region 的 epoch 就会发生变化。 RegionEpoch 的 `conf_ver` 在 ConfChange 期间增加，而 version 在拆分期间增加。
 
+保证一个 Region 中的两个领导者在网络隔离的情况下获得最新的 Region 信息。
 
 ## 解读调度器
 

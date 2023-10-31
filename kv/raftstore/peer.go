@@ -48,7 +48,7 @@ func createPeer(storeID uint64, cfg *config.Config, sched chan<- worker.Task,
 func replicatePeer(storeID uint64, cfg *config.Config, sched chan<- worker.Task,
 	engines *engine_util.Engines, regionID uint64, metaPeer *metapb.Peer) (*peer, error) {
 	// We will remove tombstone key when apply snapshot
-	log.Infof("[region %v] replicates peer with ID %d", regionID, metaPeer.GetId())
+	log.Infof("[region %v] replicates peer with ID %d-%d", regionID, metaPeer.GetId(), storeID)
 	region := &metapb.Region{
 		Id:          regionID,
 		RegionEpoch: &metapb.RegionEpoch{},
@@ -200,8 +200,15 @@ func (p *peer) MaybeDestroy() bool {
 func (p *peer) Destroy(engine *engine_util.Engines, keepData bool) error {
 	start := time.Now()
 	region := p.Region()
-	log.Infof("%v begin to destroy", p.Tag)
 
+	localState, err := meta.GetRaftLocalState(engine.Raft, region.Id)
+	log.Infof("%v begin to destroy, local state %s, %s-%v", p.Tag, engine.RaftPath, localState.String(), err)
+	applyState, err := meta.GetApplyState(engine.Kv, region.Id)
+	log.Infof("%v begin to destroy, apply state %s, %s-%v", p.Tag, engine.KvPath, applyState.String(), err)
+	log.Infof("%v begin to destroy", p.Tag)
+	// [region 1] 2 begin to destroy, local state /tmp/test-raftstore233336161/raft, hard_state:<term:7 vote:1 commit:8 > last_index:8 last_term:7 -<nil>[0m
+	// [region 1] 2 begin to destroy, apply state /tmp/test-raftstore233336161/kv, applied_index:7 truncated_state:<index:5 term:5 > -<nil>[0m
+	// [region 1] 2 begin to destroy[0m
 	// Set Tombstone state explicitly
 	kvWB := new(engine_util.WriteBatch)
 	raftWB := new(engine_util.WriteBatch)
